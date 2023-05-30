@@ -1,2 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+
+
+# push with:
+# git push blog +main:refs/head/main
+#
