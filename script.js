@@ -1,6 +1,78 @@
 
+let dark_primary;
+let dark_secondary;
+let dark_tertiary;
+let dark_contrast;
+let dark_contrast_second;
+let allActiveArticles = [];
 
-document.addEventListener('DOMContentLoaded',function(){
+
+document.addEventListener('DOMContentLoaded',function() {
+
+    
+
+    // themes
+    let light_mode = document.querySelector('#light-mode');
+    let dark_mode = document.querySelector('#dark-mode');
+    let terminal_mode = document.querySelector('#terminal-mode');
+
+    let r = document.querySelector(":root");
+    let rs = getComputedStyle(r);
+    
+    dark_primary = rs.getPropertyValue('--primary')
+    dark_secondary = rs.getPropertyValue('--secondary')
+    dark_tertiary = rs.getPropertyValue('--tertiary')
+    dark_contrast = rs.getPropertyValue('--contrast')
+    dark_contrast_second = rs.getPropertyValue('--contrast-second')
+
+    setDarkMode(); // default to dark mode
+
+    document.addEventListener('click', function( event ){
+        if( light_mode.contains( event.target ) ){
+           setLightMode();
+        }
+        if( dark_mode.contains( event.target ) ){
+            setDarkMode();
+        }
+        if( terminal_mode.contains( event.target ) ){
+            setTerminalMode();
+        }
+    });
+
+    function setLightMode() {
+        let r = document.querySelector(":root");
+        r.style.setProperty('--primary', '#111');
+        r.style.setProperty('--secondary', '#333');
+        r.style.setProperty('--tertiary', '#555');
+        r.style.setProperty('--contrast', '#eee');
+        r.style.setProperty('--contrast-second', '#ccc');
+        document.querySelector("#team-logo").classList.remove('invert');
+        document.querySelector("html").classList.remove('crt');
+    }
+
+    function setDarkMode()
+    {
+        let r = document.querySelector(":root");
+        r.style.setProperty('--primary', dark_primary);
+        r.style.setProperty('--secondary', dark_secondary);
+        r.style.setProperty('--tertiary', dark_tertiary);
+        r.style.setProperty('--contrast', dark_contrast);
+        r.style.setProperty('--contrast-second', dark_contrast_second);
+        document.querySelector("#team-logo").classList.add('invert');
+        document.querySelector("html").classList.remove('crt');
+    }
+
+    function setTerminalMode()
+    {
+        let r = document.querySelector(":root");
+        r.style.setProperty('--primary', 'lime');
+        r.style.setProperty('--secondary', 'lime');
+        r.style.setProperty('--tertiary', 'lime');
+        r.style.setProperty('--contrast', 'black');
+        r.style.setProperty('--contrast-second', 'black');
+        document.querySelector("#team-logo").classList.add('invert');
+        document.querySelector("html").classList.add('crt');
+    }
 
     // Function to load external HTML files and append their contents
     function appendHTML(file) {
@@ -56,6 +128,8 @@ document.addEventListener('DOMContentLoaded',function(){
             const dataElement = document.createElement("p");
             const contentElement = document.createElement("div");
 
+            titleElement.id = "article-title";
+
             articleElement.appendChild(titleElement);
             articleElement.appendChild(dataElement);
             articleElement.appendChild(contentElement);
@@ -64,9 +138,11 @@ document.addEventListener('DOMContentLoaded',function(){
             articles.appendChild(articleElement);
 
             articleElement.classList.add("article-wrapper");
-
+            
             contentElement.classList.add("article");
             contentElement.classList.add("hidden");
+
+            dataElement.classList.add("information");
 
             titleElement.innerText = name;
             dataElement.innerText = date + " | " + category;
@@ -80,7 +156,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // Array of HTML files to be appended
     var files = [
-        "articles/nws_2023_05_25_welcome.html"
+        "articles/nws_2023_05_30_welcome2.html",
+        "articles/nws_2023_05_25_welcome.html",
     ];
 
     // Loop through the array and load each file
@@ -88,8 +165,75 @@ document.addEventListener('DOMContentLoaded',function(){
         appendHTML(files[i]);
     }
 
+    const wrapper = getWrapper('.article-wrapper');
+
+
+
+
     
 });
+
+
+async function getWrapper(selector, timeout = 15000) {
+    const start = Date.now();
+
+    while (Date.now() - start < timeout) {
+    const el = document.querySelectorAll(selector);
+    if (el) {
+        if (el.length > 0)
+        {
+            el.forEach(i => {
+                var articleTitle = i.querySelector('#article-title')
+                articleTitle.addEventListener('click', toggleArticle);
+                articleTitle.articleContent =  i.querySelector('.article');
+                articleTitle.wrapper = i;
+            });
+            return null; ///// IT DOSENT WORK WITH THIS RETURN
+            /*el.forEach(i => i.addEventListener(
+                "click",
+                e => {
+                    alert(e.currentTarget.dataset.myDataContent);
+                }));*/
+
+        }
+
+        
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    return null;
+}
+
+function toggleArticle()
+{
+
+    // call this if this to toggle clicking on same article to close
+    if(allActiveArticles.length == 1)
+        if(allActiveArticles[0] == this) {
+            this.wrapper.classList.remove('active');
+            this.articleContent.classList.add('hidden');
+            allActiveArticles.splice(0, 1);
+            return;
+        }
+
+
+    // article open/close logic when clicking on others
+    for(var i = 0; i < allActiveArticles.length; i++)
+    {
+        if (allActiveArticles[i] == this)
+            return;
+        allActiveArticles[i].wrapper.classList.remove('active');
+        allActiveArticles[i].articleContent.classList.add('hidden');
+        allActiveArticles.splice(i, 1);
+    }
+
+    this.wrapper.classList.add('active');
+    this.articleContent.classList.remove('hidden');
+    allActiveArticles.push(this);
+
+}
+
 
 
 /*
@@ -124,3 +268,4 @@ document.addEventListener('DOMContentLoaded',function(){
       whichSectionsAreInSight();
       
     });*/
+
